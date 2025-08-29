@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Спокойной ночи ❤️</title>
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            overflow: hidden;
+            background: rgb(251,116,168); /* нежно-розовый фон */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+        h1 {
+            font-size: 3em;
+            text-align: center;
+            background: linear-gradient(45deg, red, orange, yellow, green, blue, indigo, violet);
+            -webkit-background-clip: text;
+            color: transparent;
+            animation: rainbow 5s linear infinite;
+            z-index: 2;
+            position: relative;
+        }
+        @keyframes rainbow {
+            0% { filter: hue-rotate(0deg); }
+            100% { filter: hue-rotate(360deg); }
+        }
+        .heart {
+            position: absolute;
+            font-size: 24px;
+            animation: fall linear infinite;
+            z-index: 3;
+        }
+        .falling-img {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            animation: fall linear infinite;
+            z-index: 2;
+        }
+        @keyframes fall {
+            from { transform: translateY(-10vh) rotate(0deg); opacity: 1; }
+            to { transform: translateY(110vh) rotate(360deg); opacity: 0; }
+        }
+        .floating-img {
+            position: absolute;
+            width: 180px;
+            animation: moveAround 12s infinite linear, scaleAnim 6s infinite ease-in-out;
+            z-index: 1;
+        }
+        @keyframes moveAround {
+            0%   { transform: translate(0, 0) rotate(0deg); }
+            25%  { transform: translate(50px, -80px) rotate(15deg); }
+            50%  { transform: translate(-40px, 60px) rotate(-10deg); }
+            75%  { transform: translate(70px, 40px) rotate(20deg); }
+            100% { transform: translate(0, 0) rotate(0deg); }
+        }
+        @keyframes scaleAnim {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+    </style>
+</head>
+<body>
+    <h1>Спокойной ночи Майсичка🫶🏻🫶🏻🫶🏻🫶🏻 Люблю тебяяяя🫶🏻</h1>
+
+    <!-- Основные картинки -->
+    <img src="images/img1.jpeg" class="floating-img" style="top:20%; left:10%; animation-duration: 14s;">
+    <img src="images/img2.jpeg" class="floating-img" style="top:50%; left:70%; animation-duration: 16s;">
+    <img src="images/img3.jpeg" class="floating-img" style="top:30%; left:40%; animation-duration: 18s;">
+    <img src="images/img4.jpeg" class="floating-img" style="top:60%; left:20%; animation-duration: 20s;">
+
+    <script>
+        function createHeart() {
+            const heart = document.createElement("div");
+            heart.classList.add("heart");
+            heart.innerHTML = "💖";
+            heart.style.left = Math.random() * 100 + "vw";
+            heart.style.animationDuration = (Math.random() * 3 + 2) + "s";
+            document.body.appendChild(heart);
+            setTimeout(() => { heart.remove(); }, 5000);
+        }
+
+        function createFallingImage() {
+            const imgList = ["images/img1.jpeg", "images/img2.jpeg", "images/img3.jpeg", "images/img4.jpeg"];
+            const fallingImg = document.createElement("img");
+            fallingImg.classList.add("falling-img");
+            fallingImg.src = imgList[Math.floor(Math.random() * imgList.length)];
+            fallingImg.style.left = Math.random() * 100 + "vw";
+            fallingImg.style.animationDuration = (Math.random() * 3 + 2) + "s";
+            document.body.appendChild(fallingImg);
+            setTimeout(() => { fallingImg.remove(); }, 5000);
+        }
+
+        // Сердечки — каждую 0.3с
+        setInterval(createHeart, 300);
+
+        // Падающие фото — каждые 0.6с (в 2 раза реже)
+        setInterval(createFallingImage, 600);
+    </script>
+</body>
+</html>
