@@ -3,99 +3,192 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Спокойной ночи ❤️</title>
+    <title>Block Blast Game</title>
     <style>
         body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f0f0f0;
             margin: 0;
+            padding: 0;
+        }
+
+        #game-container {
+            width: 100%;
             height: 100vh;
-            overflow: hidden;
-            background: rgb(251,116,168); /* нежно-розовый фон */
             display: flex;
             justify-content: center;
             align-items: center;
             flex-direction: column;
         }
+
         h1 {
-            font-size: 3em;
-            text-align: center;
-            background: linear-gradient(45deg, red, orange, yellow, green, blue, indigo, violet);
-            -webkit-background-clip: text;
-            color: transparent;
-            animation: rainbow 5s linear infinite;
-            z-index: 2;
-            position: relative;
+            font-size: 36px;
+            color: #ff6347;
+            margin-top: 20px;
         }
-        @keyframes rainbow {
-            0% { filter: hue-rotate(0deg); }
-            100% { filter: hue-rotate(360deg); }
-        }
-        .heart {
-            position: absolute;
-            font-size: 24px;
-            animation: fall linear infinite;
-            z-index: 3;
-        }
-        .falling-img {
-            position: absolute;
-            width: 50px;
-            height: 50px;
-            object-fit: cover;
-            animation: fall linear infinite;
-            z-index: 2;
-        }
-        @keyframes fall {
-            from { transform: translateY(-10vh) rotate(0deg); opacity: 1; }
-            to { transform: translateY(110vh) rotate(360deg); opacity: 0; }
-        }
-        .floating-img {
-            position: absolute;
-            width: 180px;
-            animation: moveAround 12s infinite linear, scaleAnim 6s infinite ease-in-out;
-            z-index: 1;
-        }
-        @keyframes moveAround {
-            0%   { transform: translate(0, 0) rotate(0deg); }
-            25%  { transform: translate(50px, -80px) rotate(15deg); }
-            50%  { transform: translate(-40px, 60px) rotate(-10deg); }
-            75%  { transform: translate(70px, 40px) rotate(20deg); }
-            100% { transform: translate(0, 0) rotate(0deg); }
-        }
-        @keyframes scaleAnim {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.2); }
+
+        #gameCanvas {
+            border: 2px solid #000;
+            background-color: #222;
         }
     </style>
 </head>
 <body>
-    <h1>Спокойной ночи Майсичка🫶🏻🫶🏻🫶🏻🫶🏻 Люблю тебяяяя🫶🏻</h1>
+
+    <div id="game-container">
+        <h1>Лучше Мурика нет никого</h1>
+        <canvas id="gameCanvas" width="800" height="600"></canvas>
+    </div>
 
     <script>
-        function createHeart() {
-            const heart = document.createElement("div");
-            heart.classList.add("heart");
-            heart.innerHTML = "💖";
-            heart.style.left = Math.random() * 100 + "vw";
-            heart.style.animationDuration = (Math.random() * 3 + 2) + "s";
-            document.body.appendChild(heart);
-            setTimeout(() => { heart.remove(); }, 5000);
+        // Инициализация переменных
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+
+        let ballRadius = 10;
+        let x = canvas.width / 2;
+        let y = canvas.height - 30;
+        let dx = 2;
+        let dy = -2;
+
+        let paddleHeight = 10;
+        let paddleWidth = 75;
+        let paddleX = (canvas.width - paddleWidth) / 2;
+
+        let rightPressed = false;
+        let leftPressed = false;
+
+        let brickRowCount = 3;
+        let brickColumnCount = 5;
+        let brickWidth = 75;
+        let brickHeight = 20;
+        let brickPadding = 10;
+        let brickOffsetTop = 30;
+        let brickOffsetLeft = 30;
+
+        let bricks = [];
+
+        // Создание блоков
+        for(let c = 0; c < brickColumnCount; c++) {
+            bricks[c] = [];
+            for(let r = 0; r < brickRowCount; r++) {
+                bricks[c][r] = { x: 0, y: 0, status: 1 };
+            }
         }
 
-        function createFallingImage() {
-            const imgList = ["images/img1.jpeg", "images/img2.jpeg", "images/img3.jpeg", "images/img4.jpeg"];
-            const fallingImg = document.createElement("img");
-            fallingImg.classList.add("falling-img");
-            fallingImg.src = imgList[Math.floor(Math.random() * imgList.length)];
-            fallingImg.style.left = Math.random() * 100 + "vw";
-            fallingImg.style.animationDuration = (Math.random() * 3 + 2) + "s";
-            document.body.appendChild(fallingImg);
-            setTimeout(() => { fallingImg.remove(); }, 5000);
+        // Управление
+        document.addEventListener("keydown", keyDownHandler, false);
+        document.addEventListener("keyup", keyUpHandler, false);
+
+        function keyDownHandler(e) {
+            if(e.key == "Right" || e.key == "ArrowRight") {
+                rightPressed = true;
+            } else if(e.key == "Left" || e.key == "ArrowLeft") {
+                leftPressed = true;
+            }
         }
 
-        // Сердечки — каждую 0.3с
-        setInterval(createHeart, 300);
+        function keyUpHandler(e) {
+            if(e.key == "Right" || e.key == "ArrowRight") {
+                rightPressed = false;
+            } else if(e.key == "Left" || e.key == "ArrowLeft") {
+                leftPressed = false;
+            }
+        }
 
-        // Падающие фото — каждые 0.6с (в 2 раза реже)
-        setInterval(createFallingImage, 600);
+        // Отрисовка мяча
+        function drawBall() {
+            ctx.beginPath();
+            ctx.arc(x, y, ballRadius, 0, Math.PI*2);
+            ctx.fillStyle = "#0095DD";
+            ctx.fill();
+            ctx.closePath();
+        }
+
+        // Отрисовка ракетки
+        function drawPaddle() {
+            ctx.beginPath();
+            ctx.rect(paddleX, canvas.height - paddleHeight, paddleWidth, paddleHeight);
+            ctx.fillStyle = "#0095DD";
+            ctx.fill();
+            ctx.closePath();
+        }
+
+        // Отрисовка блоков
+        function drawBricks() {
+            for(let c = 0; c < brickColumnCount; c++) {
+                for(let r = 0; r < brickRowCount; r++) {
+                    if(bricks[c][r].status == 1) {
+                        let brickX = (c * (brickWidth + brickPadding)) + brickOffsetLeft;
+                        let brickY = (r * (brickHeight + brickPadding)) + brickOffsetTop;
+                        bricks[c][r].x = brickX;
+                        bricks[c][r].y = brickY;
+                        ctx.beginPath();
+                        ctx.rect(brickX, brickY, brickWidth, brickHeight);
+                        ctx.fillStyle = "#0095DD";
+                        ctx.fill();
+                        ctx.closePath();
+                    }
+                }
+            }
+        }
+
+        // Обработка столкновений с блоками
+        function collisionDetection() {
+            for(let c = 0; c < brickColumnCount; c++) {
+                for(let r = 0; r < brickRowCount; r++) {
+                    let b = bricks[c][r];
+                    if(b.status == 1) {
+                        if(x > b.x && x < b.x + brickWidth && y > b.y && y < b.y + brickHeight) {
+                            dy = -dy;
+                            b.status = 0;
+                        }
+                    }
+                }
+            }
+        }
+
+        // Обновление игры
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawBricks();
+            drawBall();
+            drawPaddle();
+            collisionDetection();
+
+            // Двигаем мяч
+            x += dx;
+            y += dy;
+
+            // Столкновение с верхом
+            if(y + dy < ballRadius) {
+                dy = -dy;
+            } else if(y + dy > canvas.height - ballRadius) {
+                if(x > paddleX && x < paddleX + paddleWidth) {
+                    dy = -dy;
+                } else {
+                    document.location.reload();
+                }
+            }
+
+            // Столкновение с боковыми границами
+            if(x + dx > canvas.width - ballRadius || x + dx < ballRadius) {
+                dx = -dx;
+            }
+
+            // Двигаем ракетку
+            if(rightPressed && paddleX < canvas.width - paddleWidth) {
+                paddleX += 7;
+            } else if(leftPressed && paddleX > 0) {
+                paddleX -= 7;
+            }
+
+            requestAnimationFrame(draw);
+        }
+
+        draw();
     </script>
+
 </body>
 </html>
